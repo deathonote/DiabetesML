@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction</title>
+    <style>
+        /* General reset */
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Page styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+
+        /* Form container */
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        /* Label and input styling */
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-size: 1.1em;
+            text-align: left;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Button styling */
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1em;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        /* Result styling */
+        #result {
+            margin-top: 15px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        /* Error message styling */
+        .error {
+            color: #d9534f;
+            margin-top: 10px;
+        }
+
+        /* Loading styling */
+        .loading {
+            color: #007bff;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Diabetes Prediction</h1>
+        <label for="age">Age:</label>
+        <input type="number" id="age" placeholder="Enter age">
+
+        <label for="blood_sugar_level">Blood Sugar Level:</label>
+        <input type="number" id="blood_sugar_level" placeholder="Enter blood sugar level">
+
+        <label for="insulin_level">Insulin Level:</label>
+        <input type="number" id="insulin_level" placeholder="Enter insulin level">
+
+        <label for="BMI">BMI:</label>
+        <input type="number" id="BMI" placeholder="Enter BMI">
+
+        <label for="model_type">Model Type:</label>
+        <select id="model_type">
+            <option value="naive_bayes">Naive Bayes</option>
+            <option value="perceptron">Perceptron</option>
+        </select>
+
+        <button onclick="predict()">Predict</button>
+        <p id="result"></p>
+        <p id="error" class="error"></p>
+    </div>
+
+    <script>
+        async function predict() {
+            const age = document.getElementById("age").value;
+            const blood_sugar_level = document.getElementById("blood_sugar_level").value;
+            const insulin_level = document.getElementById("insulin_level").value;
+            const BMI = document.getElementById("BMI").value;
+            const model_type = document.getElementById("model_type").value;
+
+            // Clear previous results and errors
+            document.getElementById("result").innerText = "";
+            document.getElementById("error").innerText = "";
+
+            // Validate input fields
+            if (!age || !blood_sugar_level || !insulin_level || !BMI) {
+                document.getElementById("error").innerText = "Please fill in all fields.";
+                return;
+            }
+
+            // Display loading message
+            document.getElementById("result").innerText = "Loading...";
+
+            try {
+                // Send POST request
+                const response = await fetch("http://127.0.0.1:5000/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ age, blood_sugar_level, insulin_level, BMI, model_type })
+                });
+
+                // Parse and display the result
+                const result = await response.json();
+                if (response.ok) {
+                    document.getElementById("result").innerText = "Prediction: " + result.prediction;
+                } else {
+                    document.getElementById("error").innerText = "Error: " + result.error;
+                }
+            } catch (error) {
+                document.getElementById("error").innerText = "Failed to connect to the server.";
+            }
+        }
+    </script>
+</body>
+</html>
